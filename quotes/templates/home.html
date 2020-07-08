@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-{% for list_item in output %}
-        {{list_item}}<br/><br/>
-{% endfor %}
+
+
+
 <canvas id="myChart" width="400" height="400"></canvas>
 <script>
 var ctx = document.getElementById('myChart').getContext('2d');
@@ -10,17 +10,23 @@ var myLineChart = new Chart(ctx, {
     type: 'line',
     data: {
         labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-        datasets: [{
-            label: '# of Votes',
-            data: [ 12, 19, 3, 5, 2, 3],
+        datasets: [
+        {%for list_item in output %}
+            { {% for mykey,myvalue in list_item.items %}
+            label: '{{mykey}}',
+            data: {{myvalue}},
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
             ],
             borderColor: [
                 'rgba(255, 99, 132, 1)',
             ],
-            borderWidth: 1
-        }]
+            borderWidth: 1,
+            fill: false,
+            {% endfor %}
+        },
+        {%endfor%}
+        ]
     },
     options: {
         scales: {

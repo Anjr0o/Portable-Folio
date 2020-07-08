@@ -20,14 +20,20 @@ def home(request):
         ticker = Stock.objects.all()
 
         output = []
-        for ticker_item in ticker:
 
+        for ticker_item in ticker:
             api_request = requests.get(
-                "https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/chart/5d?token=pk_1103aef826214ba59719ee614c8e8e3b")
+                "https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/chart/5d?token=pk_1103aef826214ba59719ee614c8e8e3b&chartCloseOnly=true")
 
             try:
                 api = json.loads(api_request.content)
-                output.append(api)
+                currentStockHistory = []
+                for eachDay in api:
+                    close = eachDay['close']
+                    currentStockHistory.append(close)
+                output.append({str(ticker_item): currentStockHistory})
+
+
             except Exception as e:
                 api = "Error..."
 

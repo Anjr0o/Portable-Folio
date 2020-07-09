@@ -9,19 +9,19 @@ var ctx = document.getElementById('myChart').getContext('2d');
 var myLineChart = new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        labels: ['5D AGO', '4D AGO', '3D AGO', '2D AGO', '1D AGO'],
         datasets: [
         {%for list_item in output %}
             { {% for mykey,myvalue in list_item.items %}
             label: '{{mykey}}',
             data: {{myvalue}},
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-            ],
             borderColor: [
-                'rgba(255, 99, 132, 1)',
+                '#'+Math.floor(Math.random()*16777215).toString(16),
             ],
-            borderWidth: 1,
+            borderWidth: 4,
+            pointBorderColor: '#'+Math.floor(Math.random()*16777215).toString(16),
+            pointBorderWidth: 4,
+            pointRadius: 4,
             fill: false,
             {% endfor %}
         },

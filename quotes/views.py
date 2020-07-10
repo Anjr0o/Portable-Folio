@@ -52,9 +52,22 @@ def add_stock(request):
         form = StockForm(request.POST or None)
 
         if form.is_valid():
+            api_request = requests.get(
+                "https://cloud.iexapis.com/stable/stock/aapl/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
+
+            api = json.loads(api_request.content)
+            latestPrice = api['latestPrice']
+            quantity = form['quantity'].value()
+            purchaseValue = float(latestPrice) * float(quantity)
+            currentValue = Balance.objects.get(pk=1).amount
+            newValue = float(purchaseValue) + float(currentValue)
+            Balance.objects.filter(pk=1).update(amount=newValue)
+
             form.save()
             messages.success(request, ("Stock Has Been Added to the database"))
             return redirect('add_stock')
+
+
     else:
         ticker = Stock.objects.all()
         output = []
@@ -78,7 +91,6 @@ def delete(request, stock_id):
     import json
 
     item = Stock.objects.get(pk=stock_id)
-    print(item)
 
     api_request = requests.get(
         "https://cloud.iexapis.com/stable/stock/" + str(

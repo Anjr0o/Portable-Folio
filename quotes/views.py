@@ -74,11 +74,26 @@ def add_stock(request):
     return render(request, 'add_stock.html', {'ticker': ticker, 'output': output, 'quantities': quantities})
 
 def delete(request, stock_id):
+    import requests
+    import json
+
     item = Stock.objects.get(pk=stock_id)
-    # latestPric = latestPrice * item.
+    print(item)
+
+    api_request = requests.get(
+        "https://cloud.iexapis.com/stable/stock/" + str(
+            item.ticker) + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
+
+    api = json.loads(api_request.content)
+    latestPrice = api['latestPrice']
+    quantity = Stock.objects.get(ticker=item.ticker).quantity
+    saleValue = latestPrice * quantity
+    currentValue = Balance.objects.get(pk=1).amount
+    newValue = float(saleValue) + float(currentValue)
+    Balance.objects.filter(pk=1).update(amount=newValue)
+
     item.delete()
 
-    Balance.objects.get(pk=1).update(amount=)
     messages.success(request, ("Stock Deleted"))
     return redirect(delete_stock)
 

@@ -9,8 +9,6 @@ def home(request):
     import requests
     import json
 
-    default_value = Balance(title='Balance', amount=1500.00, pk=1)
-    default_value.save()
     if request.method == 'POST':
         form = StockForm(request.POST or None)
 
@@ -23,23 +21,27 @@ def home(request):
 
         output = []
 
+        portfolioValueData = [0, 0, 0, 0, 0]
+
         for ticker_item in ticker:
             api_request = requests.get(
                 "https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/chart/5d?token=pk_1103aef826214ba59719ee614c8e8e3b&chartCloseOnly=true")
 
-            try:
-                api = json.loads(api_request.content)
-                currentStockHistory = []
-                for eachDay in api:
-                    close = eachDay['close']
-                    currentStockHistory.append(close)
-                output.append({str(ticker_item): currentStockHistory})
+            api = json.loads(api_request.content)
+            currentStockHistory = []
+
+            for counter, eachDay in enumerate(api):
+                close = eachDay['close']
+                currentStockHistory.append(close)
+                quantity = Stock.objects.get(ticker=str(ticker_item)).quantity
+                valueOwned = close * quantity
+                totalOwned = portfolioValueData[counter] + valueOwned
+                portfolioValueData[counter] = totalOwned
+
+            output.append({str(ticker_item): currentStockHistory})
 
 
-            except Exception as e:
-                api = "Error..."
-
-    return render(request, 'home.html', {'ticker': ticker, 'output': output})
+    return render(request, 'home.html', {'ticker': ticker, 'output': output, 'portfolioValueData': portfolioValueData})
 
 def about(request):
     return render(request, 'about.html', {})
@@ -86,6 +88,13 @@ def add_stock(request):
 
     return render(request, 'add_stock.html', {'ticker': ticker, 'output': output, 'quantities': quantities})
 
+def reset_portfolio(request):
+    default_value = Balance(title='Balance', amount=1500.00, pk=1)
+    default_value.save()
+    Stock.objects.all().delete()
+
+    return redirect(delete_stock)
+
 def delete(request, stock_id):
     import requests
     import json
@@ -112,4 +121,3 @@ def delete(request, stock_id):
 def delete_stock(request):
     ticker = Stock.objects.all()
     return render(request, 'delete_stock.html', {'ticker': ticker})
-

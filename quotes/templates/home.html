@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-
+{{portfolioValueData}}
 
 <canvas id="myChart" width="400" height="400"></canvas>
 <script>
@@ -26,6 +26,18 @@ var myLineChart = new Chart(ctx, {
             {% endfor %}
         },
         {%endfor%}
+        {
+            label: 'Portfolio Value',
+            data: {{portfolioValueData}},
+            borderColor: [
+                '#'+Math.floor(Math.random()*16777215).toString(16),
+            ],
+            borderWidth: 5,
+            pointBorderColor: '#'+Math.floor(Math.random()*16777215).toString(16),
+            pointBorderWidth: 5,
+            pointRadius: 5,
+            fill: false,
+        }
         ]
     },
     options: {

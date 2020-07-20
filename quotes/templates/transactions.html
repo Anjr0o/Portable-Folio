@@ -1,9 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1>Yesterday's Close: ${{portfolioValueData.4}}</h1>
-<h3>Remaining Balance: ${{balance}}</h3>
-
+<h1>Transactions</h1>
+{% if transactions %}
+            {% for transaction in transactions %}
+                <div class="alert alert-warning
+                     alert-dismissable" role="alert">
+                    <button class="close" data-dismiss="alert">
+                        <small><sup>x</sup></small>
+                    </button>
+                    {{ transaction.transaction }}
+                </div>
+            {% endfor %}
+        {% endif %}
 <canvas id="myChart" width="400" height="400"></canvas>
 <script>
 var ctx = document.getElementById('myChart').getContext('2d');
@@ -12,21 +21,6 @@ var myLineChart = new Chart(ctx, {
     data: {
         labels: ['5D AGO', '4D AGO', '3D AGO', '2D AGO', '1D AGO'],
         datasets: [
-        {%for list_item in output %}
-            { {% for mykey,myvalue in list_item.items %}
-            label: '{{mykey}}',
-            data: {{myvalue}},
-            borderColor: [
-                '#'+Math.floor(Math.random()*16777215).toString(16),
-            ],
-            borderWidth: 4,
-            pointBorderColor: '#aaaaaa',
-            pointBorderWidth: 6,
-            pointRadius: 3,
-            fill: false,
-            {% endfor %}
-        },
-        {%endfor%}
         {
             label: 'Portfolio Value',
             data: {{portfolioValueData}},
@@ -52,5 +46,4 @@ var myLineChart = new Chart(ctx, {
     }
 });
 </script>
-
 {% endblock %}

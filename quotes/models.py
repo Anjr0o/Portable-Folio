@@ -14,3 +14,6 @@ class Balance(models.Model):
 
     def __str__(self):
         return self.title
+
+class Transaction(models.Model):
+    transaction = models.TextField(max_length=250)

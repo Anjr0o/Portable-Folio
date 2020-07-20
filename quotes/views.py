@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from .models import Stock, Balance
-from .forms import StockForm
+from .models import Stock, Balance, Transaction
+from .forms import StockForm, DeleteForm
 from django.contrib import messages
 from django.http import JsonResponse
 
@@ -8,6 +8,8 @@ from django.http import JsonResponse
 def home(request):
     import requests
     import json
+
+    balance = Balance.objects.get(pk=1).amount
 
     if request.method == 'POST':
         form = StockForm(request.POST or None)
@@ -41,10 +43,11 @@ def home(request):
             output.append({str(ticker_item): currentStockHistory})
 
 
-    return render(request, 'home.html', {'ticker': ticker, 'output': output, 'portfolioValueData': portfolioValueData})
+    return render(request, 'home.html', {'ticker': ticker, 'output': output, 'portfolioValueData': portfolioValueData, 'balance': balance})
 
-def about(request):
-    return render(request, 'about.html', {})
+def transactions(request):
+    transactions = Transaction.objects.all()
+    return render(request, 'transactions.html', {'transactions': transactions})
 
 def add_stock(request):
     import requests
@@ -55,14 +58,14 @@ def add_stock(request):
 
         if form.is_valid():
             api_request = requests.get(
-                "https://cloud.iexapis.com/stable/stock/aapl/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
+                "https://cloud.iexapis.com/stable/stock/"+ form['ticker'].value() + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
 
             api = json.loads(api_request.content)
             latestPrice = api['latestPrice']
             quantity = form['quantity'].value()
             purchaseValue = float(latestPrice) * float(quantity)
             currentValue = Balance.objects.get(pk=1).amount
-            newValue = float(purchaseValue) + float(currentValue)
+            newValue = float(currentValue) - float(purchaseValue)
             Balance.objects.filter(pk=1).update(amount=newValue)
 
             form.save()
@@ -89,7 +92,7 @@ def add_stock(request):
     return render(request, 'add_stock.html', {'ticker': ticker, 'output': output, 'quantities': quantities})
 
 def reset_portfolio(request):
-    default_value = Balance(title='Balance', amount=1500.00, pk=1)
+    default_value = Balance(title='Balance', amount=15000.00, pk=1)
     default_value.save()
     Stock.objects.all().delete()
 
@@ -99,6 +102,9 @@ def delete(request, stock_id):
     import requests
     import json
 
+    form = DeleteForm(request.POST or None)
+    stock_quantity = form['quantity'].value()
+
     item = Stock.objects.get(pk=stock_id)
 
     api_request = requests.get(
@@ -107,15 +113,25 @@ def delete(request, stock_id):
 
     api = json.loads(api_request.content)
     latestPrice = api['latestPrice']
-    quantity = Stock.objects.get(ticker=item.ticker).quantity
-    saleValue = latestPrice * quantity
-    currentValue = Balance.objects.get(pk=1).amount
-    newValue = float(saleValue) + float(currentValue)
-    Balance.objects.filter(pk=1).update(amount=newValue)
 
-    item.delete()
+    quantity = Stock.objects.get(pk=stock_id).quantity
+    if int(quantity) <= int(stock_quantity):
+        stock_quantity = quantity
 
-    messages.success(request, ("Stock Deleted"))
+    if int(quantity) <= int(stock_quantity):
+        item.delete()
+        messages.success(request, ("Stock Sold"))
+    elif int(stock_quantity) > 0:
+        saleValue = float(latestPrice) * float(stock_quantity)
+        currentValue = Balance.objects.get(pk=1).amount
+        newValue = int(saleValue) + int(currentValue)
+        Balance.objects.filter(pk=1).update(amount=newValue)
+        newQuantity = int(quantity) - int(stock_quantity)
+        Stock.objects.filter(pk=stock_id).update(quantity=newQuantity)
+        messages.success(request, ("Stock Sold"))
+    else:
+        messages.error(request, ("Cannot sell a negative quantity"))
+
     return redirect(delete_stock)
 
 def delete_stock(request):

@@ -18,14 +18,20 @@ def home(request):
 
             if form.is_valid():
                 try:
-                    api_request = requests.get(
-                    "https://cloud.iexapis.com/stable/stock/"+ form['ticker'].value() + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
+                    api_request = requests.get("https://cloud.iexapis.com/stable/stock/"+ form['ticker'].value() + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
 
                     api = json.loads(api_request.content)
                     latestPrice = api['latestPrice']
-                    form.save()
-                    messages.success(request, ("Stock Has Been Added to the database"))
-                    return redirect('add_stock')
+                    if Stock.objects.filter(ticker=form['ticker'].value()):
+                        quantity = form['quantity'].value()
+                        newQuantity = int(Stock.objects.get(ticker=form['ticker'].value()).quantity) + int(quantity)
+                        Stock.objects.filter(ticker=form['ticker'].value()).update(quantity=newQuantity)
+                        return redirect('add_stock')
+
+                    else:
+                        form.save()
+                        messages.success(request, ("Stock Has Been Added to the database"))
+                        return redirect('add_stock')
                 except:
                     messages.error(request, ('Stock not Valid'))
 
@@ -40,8 +46,7 @@ def home(request):
         portfolioValueData = [0, 0, 0, 0, 0]
 
         for ticker_item in ticker:
-            api_request = requests.get(
-                "https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/chart/5d?token=pk_1103aef826214ba59719ee614c8e8e3b&chartCloseOnly=true")
+            api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/chart/5d?token=pk_1103aef826214ba59719ee614c8e8e3b&chartCloseOnly=true")
 
             api = json.loads(api_request.content)
             currentStockHistory = []
@@ -71,24 +76,30 @@ def add_stock(request):
         form = StockForm(request.POST or None)
         if int(form['quantity'].value()) > 0:
             if form.is_valid():
-                try:
-                    api_request = requests.get(
-                    "https://cloud.iexapis.com/stable/stock/"+ form['ticker'].value() + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
+            # try:
+                api_request = requests.get("https://cloud.iexapis.com/stable/stock/"+ form['ticker'].value() + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
 
-                    api = json.loads(api_request.content)
-                    latestPrice = api['latestPrice']
-                    quantity = form['quantity'].value()
-                    purchaseValue = float(latestPrice) * float(quantity)
-                    currentValue = Balance.objects.get(pk=1).amount
-                    newValue = float(currentValue) - float(purchaseValue)
-                    Balance.objects.filter(pk=1).update(amount=newValue)
+                api = json.loads(api_request.content)
+                latestPrice = api['latestPrice']
 
+                quantity = form['quantity'].value()
+                purchaseValue = float(latestPrice) * float(quantity)
+                currentValue = Balance.objects.get(pk=1).amount
+                newValue = float(currentValue) - float(purchaseValue)
+                Balance.objects.filter(pk=1).update(amount=newValue)
+
+                if Stock.objects.filter(ticker=form['ticker'].value()):
+                    newQuantity = int(Stock.objects.get(ticker=form['ticker'].value()).quantity) + int(quantity)
+                    Stock.objects.filter(ticker=form['ticker'].value()).update(quantity=newQuantity)
+                    return redirect('add_stock')
+
+                else:
                     form.save()
                     messages.success(request, ("Stock Has Been Added to the database"))
                     return redirect('add_stock')
-                except:
-                    messages.error(request, ('Stock not Valid'))
-                    return redirect('add_stock')
+            # except:
+                messages.error(request, ('Stock not Valid'))
+                return redirect('add_stock')
         else:
             messages.error(request, ("Cannot add a negative quantity"))
             return redirect('add_stock')
@@ -99,8 +110,7 @@ def add_stock(request):
         quantities = []
         for ticker_item in ticker:
 
-            api_request = requests.get(
-                "https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
+            api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
 
             try:
                 api = json.loads(api_request.content)

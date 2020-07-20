@@ -14,7 +14,7 @@ def home(request):
     if request.method == 'POST':
         form = StockForm(request.POST or None)
 
-        if int(form['quantity'].value()) > 0:
+        if int(float(form['quantity'].value())) > 0:
 
             if form.is_valid():
                 try:
@@ -22,15 +22,26 @@ def home(request):
 
                     api = json.loads(api_request.content)
                     latestPrice = api['latestPrice']
-                    if Stock.objects.filter(ticker=form['ticker'].value()):
-                        quantity = form['quantity'].value()
-                        newQuantity = int(Stock.objects.get(ticker=form['ticker'].value()).quantity) + int(quantity)
-                        Stock.objects.filter(ticker=form['ticker'].value()).update(quantity=newQuantity)
-                        return redirect('add_stock')
+                    quantity = form['quantity'].value()
+                    purchaseValue = float(latestPrice) * float(quantity)
+                    currentValue = Balance.objects.get(pk=1).amount
+                    newValue = float(currentValue) - float(purchaseValue)
 
+                    if float(newValue) > 0:
+                        Balance.objects.filter(pk=1).update(amount=newValue)
+
+                        if Stock.objects.filter(ticker=form['ticker'].value()):
+                            newQuantity = int(Stock.objects.get(ticker=form['ticker'].value()).quantity) + int(quantity)
+                            Stock.objects.filter(ticker=form['ticker'].value()).update(quantity=newQuantity)
+                            messages.success(request, ("Stock has been added to the database"))
+                            return redirect('add_stock')
+
+                        else:
+                            form.save()
+                            messages.success(request, ("Stock Has Been Added to the database"))
+                            return redirect('add_stock')
                     else:
-                        form.save()
-                        messages.success(request, ("Stock Has Been Added to the database"))
+                        messages.error(request, ('Not enough funds'))
                         return redirect('add_stock')
                 except:
                     messages.error(request, ('Stock not Valid'))
@@ -74,32 +85,38 @@ def add_stock(request):
 
     if request.method == 'POST':
         form = StockForm(request.POST or None)
-        if int(form['quantity'].value()) > 0:
+        if int(float(form['quantity'].value())) > 0:
             if form.is_valid():
-            # try:
-                api_request = requests.get("https://cloud.iexapis.com/stable/stock/"+ form['ticker'].value() + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
+                try:
+                    api_request = requests.get("https://cloud.iexapis.com/stable/stock/"+ form['ticker'].value() + "/quote?token=pk_1103aef826214ba59719ee614c8e8e3b")
 
-                api = json.loads(api_request.content)
-                latestPrice = api['latestPrice']
+                    api = json.loads(api_request.content)
+                    latestPrice = api['latestPrice']
 
-                quantity = form['quantity'].value()
-                purchaseValue = float(latestPrice) * float(quantity)
-                currentValue = Balance.objects.get(pk=1).amount
-                newValue = float(currentValue) - float(purchaseValue)
-                Balance.objects.filter(pk=1).update(amount=newValue)
+                    quantity = form['quantity'].value()
+                    purchaseValue = float(latestPrice) * float(quantity)
+                    currentValue = Balance.objects.get(pk=1).amount
+                    newValue = float(currentValue) - float(purchaseValue)
 
-                if Stock.objects.filter(ticker=form['ticker'].value()):
-                    newQuantity = int(Stock.objects.get(ticker=form['ticker'].value()).quantity) + int(quantity)
-                    Stock.objects.filter(ticker=form['ticker'].value()).update(quantity=newQuantity)
+                    if float(newValue) > 0:
+                        Balance.objects.filter(pk=1).update(amount=newValue)
+
+                        if Stock.objects.filter(ticker=form['ticker'].value()):
+                            newQuantity = int(Stock.objects.get(ticker=form['ticker'].value()).quantity) + int(quantity)
+                            Stock.objects.filter(ticker=form['ticker'].value()).update(quantity=newQuantity)
+                            messages.success(request, ("Stock has been added to the database"))
+                            return redirect('add_stock')
+
+                        else:
+                            form.save()
+                            messages.success(request, ("Stock Has Been Added to the database"))
+                            return redirect('add_stock')
+                    else:
+                        messages.error(request, ('Not enough funds'))
+                        return  redirect('add_stock')
+                except:
+                    messages.error(request, ('Stock not Valid'))
                     return redirect('add_stock')
-
-                else:
-                    form.save()
-                    messages.success(request, ("Stock Has Been Added to the database"))
-                    return redirect('add_stock')
-            # except:
-                messages.error(request, ('Stock not Valid'))
-                return redirect('add_stock')
         else:
             messages.error(request, ("Cannot add a negative quantity"))
             return redirect('add_stock')

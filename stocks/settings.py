@@ -25,7 +25,7 @@ SECRET_KEY = '+4oalid6y24(-l!oz*x^ga+^ns+^ey8#d+j#p2kt909k71l#!a'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['sockportfolio.herokuapp.com']
 
 
 # Application definition

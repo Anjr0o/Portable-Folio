@@ -87,7 +87,7 @@ def home(request):
 def transactions(request):
     import requests
     import json
-
+    balance = Balance.objects.get(pk=1).amount
     transactions = Transaction.objects.all()
     ticker = Stock.objects.all()
 
@@ -111,7 +111,7 @@ def transactions(request):
             portfolioValueData[counter] = totalOwned
 
         output.append({str(ticker_item): currentStockHistory})
-    return render(request, 'transactions.html', {'transactions': transactions, 'portfolioValueData': portfolioValueData})
+    return render(request, 'transactions.html', {'transactions': transactions, 'portfolioValueData': portfolioValueData, 'balance': balance})
 
 def add_stock(request):
     import requests
@@ -138,7 +138,7 @@ def add_stock(request):
                         if Stock.objects.filter(ticker=form['ticker'].value()):
                             newQuantity = int(Stock.objects.get(ticker=form['ticker'].value()).quantity) + int(quantity)
                             Stock.objects.filter(ticker=form['ticker'].value()).update(quantity=newQuantity)
-                            messages.success(request, ("Stock has been added to the database"))
+                            messages.success(request, ("Stock has been added to your portfolio"))
                             if int(float(quantity)) > 1:
                                 message = "Purchased " + str(quantity) + " shares of " + str(
                                     api['companyName']) + " (" + str(api['symbol']) + ") at $" + str(
@@ -152,8 +152,8 @@ def add_stock(request):
 
                         else:
                             form.save()
-                            messages.success(request, ("Stock Has Been Added to the database"))
-                            if int(float(stock_quantity)) > 1:
+                            messages.success(request, ("Stock has been added to your portfolio"))
+                            if int(float(quantity)) > 1:
                                 message = "Purchased " + str(quantity) + " shares of " + str(
                                     api['companyName']) + " (" + str(api['symbol']) + ") at $" + str(
                                     latestPrice) + " for a total of $" + str(purchaseValue)
@@ -167,7 +167,7 @@ def add_stock(request):
                         messages.error(request, ('Not enough funds'))
                         return  redirect('add_stock')
                 except:
-                    messages.error(request, ('Stock not Valid'))
+                    messages.error(request, ('Stock not valid'))
                     return redirect('add_stock')
         else:
             messages.error(request, ("Cannot add a negative quantity"))
@@ -220,7 +220,7 @@ def delete(request, stock_id):
 
     if int(quantity) <= int(stock_quantity):
         item.delete()
-        messages.success(request, ("Stock Sold"))
+        messages.success(request, ("Stock has been sold"))
 
         if int(float(stock_quantity)) > 1:
             message = "Sold " + str(stock_quantity) + " shares of " + str(api['companyName']) + " (" + str(
@@ -238,7 +238,7 @@ def delete(request, stock_id):
         Balance.objects.filter(pk=1).update(amount=newValue)
         newQuantity = int(quantity) - int(stock_quantity)
         Stock.objects.filter(pk=stock_id).update(quantity=newQuantity)
-        messages.success(request, ("Stock Sold"))
+        messages.success(request, ("Stock has been sold"))
 
         if int(float(stock_quantity)) > 1:
             message = "Sold " + str(stock_quantity) + " shares of " + str(api['companyName']) + " (" + str(api['symbol']) + ") at $" + str(latestPrice) + " for a total of $" + str(saleValue)

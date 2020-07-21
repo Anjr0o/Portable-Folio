@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
+<h1>Yesterday's Close: ${{portfolioValueData.4}}</h1>
+<h3>Remaining Balance: ${{balance}}</h3>
 <canvas id="myChart" width="400" height="400"></canvas>
 <script>
 var ctx = document.getElementById('myChart').getContext('2d');
@@ -15,7 +17,7 @@ var myLineChart = new Chart(ctx, {
                 '#'+Math.floor(Math.random()*16777215).toString(16),
             ],
             borderWidth: 5,
-            pointBorderColor: '#aaaaaa',
+            pointBorderColor: 'white',
             pointBorderWidth: 8,
             pointRadius: 4,
             fill: false,

@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
   <head>
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous" />
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="{% static 'styles.css'%}">
     <title>Stock Portfolio</title>
   </head>
   <body>
@@ -28,10 +30,10 @@
       </li>
 
         <li class="nav-item">
-        <a class="nav-link" href="{% url 'add_stock' %}">Add Stock</a>
+        <a class="nav-link" href="{% url 'add_stock' %}">Buy Stock</a>
       </li>
         <li class="nav-item">
-        <a class="nav-link" href="{% url 'delete_stock' %}">Delete Stock</a>
+        <a class="nav-link" href="{% url 'delete_stock' %}">Sell Stock</a>
       </li>
     </ul>
     <form action="{% url 'add_stock' %}" class="form-inline my-2 my-lg-0" method="POST">

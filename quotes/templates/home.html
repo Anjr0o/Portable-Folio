@@ -27,25 +27,13 @@ var myLineChart = new Chart(ctx, {
             {% endfor %}
         },
         {%endfor%}
-        {
-            label: 'Portfolio Value',
-            data: {{portfolioValueData}},
-            borderColor: [
-                '#'+Math.floor(Math.random()*16777215).toString(16),
-            ],
-            borderWidth: 5,
-            pointBorderColor: '#aaaaaa',
-            pointBorderWidth: 8,
-            pointRadius: 4,
-            fill: false,
-        }
         ]
     },
     options: {
         scales: {
             yAxes: [{
                 ticks: {
-                    beginAtZero: true
+                    beginAtZero: false
                 }
             }]
         }

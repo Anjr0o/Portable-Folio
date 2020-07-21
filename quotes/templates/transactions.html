@@ -1,18 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<h1>Transactions</h1>
-{% if transactions %}
-            {% for transaction in transactions %}
-                <div class="alert alert-warning
-                     alert-dismissable" role="alert">
-                    <button class="close" data-dismiss="alert">
-                        <small><sup>x</sup></small>
-                    </button>
-                    {{ transaction.transaction }}
-                </div>
-            {% endfor %}
-        {% endif %}
 <canvas id="myChart" width="400" height="400"></canvas>
 <script>
 var ctx = document.getElementById('myChart').getContext('2d');
@@ -39,11 +26,23 @@ var myLineChart = new Chart(ctx, {
         scales: {
             yAxes: [{
                 ticks: {
-                    beginAtZero: true
+                    beginAtZero: false
                 }
             }]
         }
     }
 });
 </script>
+<h1>Transactions</h1>
+{% if transactions %}
+            {% for transaction in transactions %}
+                <div class="alert alert-warning
+                     alert-dismissable" role="alert">
+                    <button class="close" data-dismiss="alert">
+                        <small><sup>x</sup></small>
+                    </button>
+                    {{ transaction.transaction }}
+                </div>
+            {% endfor %}
+        {% endif %}
 {% endblock %}

@@ -4,11 +4,11 @@
 <h1>Delete Stock</h1>
 {% if ticker %}
     {% for item in ticker %}
-{{ item }} - <a href="{% url 'delete' item.id %}">Delete Stock</a>
+<h4>{{ item }}:  </h4>
         <form action="{% url 'delete' item.id %}" class="form-inline my-2 my-lg-0" method="POST">
                  {% csrf_token %}
-                 <input class="form-control mr-sm-2" type="number" placeholder="Quantity" aria-label="Number" name="quantity">
-                 <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Sell Stock</button>
+                <input class="form-control mr-sm-2" type="number" placeholder="Quantity" aria-label="Number" name="quantity">
+                <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Sell Stock</button>
             </form>
         <br/>
     {% endfor %}

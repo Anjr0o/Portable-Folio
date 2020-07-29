@@ -12,7 +12,6 @@ def home(request):
 
     if request.method == 'POST':
         form = StockForm(request.POST or None)
-
         if int(float(form['quantity'].value())) > 0:
 
             if form.is_valid():
@@ -54,10 +53,10 @@ def home(request):
                         return redirect('add_stock')
                 except:
                     messages.error(request, ('Stock not Valid'))
-
         else:
             messages.error(request, ("Cannot add a negative quantity"))
             return redirect('add_stock')
+
     else:
         ticker = Stock.objects.all()
 
@@ -79,10 +78,13 @@ def home(request):
                 totalOwned = portfolioValueData[counter] + valueOwned
                 portfolioValueData[counter] = totalOwned
 
+            yesterdaysClose = "{:.2f}".format(portfolioValueData[4])
+
             output.append({str(ticker_item): currentStockHistory})
 
 
-    return render(request, 'home.html', {'ticker': ticker, 'output': output, 'portfolioValueData': portfolioValueData, 'balance': balance})
+    return render(request, 'home.html', {'ticker': ticker, 'output': output, 'portfolioValueData': portfolioValueData, 'balance': balance,
+                                         'yesterdaysClose': yesterdaysClose})
 
 def transactions(request):
     import requests
@@ -110,8 +112,11 @@ def transactions(request):
             totalOwned = portfolioValueData[counter] + valueOwned
             portfolioValueData[counter] = totalOwned
 
+        yesterdaysClose = "{:.2f}".format(portfolioValueData[4])
+
         output.append({str(ticker_item): currentStockHistory})
-    return render(request, 'transactions.html', {'transactions': transactions, 'portfolioValueData': portfolioValueData, 'balance': balance})
+    return render(request, 'transactions.html', {'transactions': transactions, 'portfolioValueData': portfolioValueData, 'balance': balance,
+                                                 'yesterdaysClose': yesterdaysClose})
 
 def add_stock(request):
     import requests

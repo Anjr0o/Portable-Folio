@@ -6,6 +6,7 @@ class StockForm(forms.ModelForm):
         model = models.Stock
         fields = ['ticker', 'quantity']
 
+
 class DeleteForm(forms.ModelForm):
     class Meta:
         model = models.Stock

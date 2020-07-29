@@ -7,6 +7,5 @@ typing~=3.7.4.1
 ipaddress~=1.0.22
 pytz~=2013.7
 enum34~=1.1.6
-wsgiref~=0.1.2
 numpy~=1.8.0rc1
 setuptools~=41.0.1
